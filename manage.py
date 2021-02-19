@@ -3,6 +3,7 @@ import os
 
 
 # Class definitions
+from data_parser import parse_data
 
 
 class ResultObj(object):
@@ -17,11 +18,21 @@ class ResultObj(object):
     def __repr__(self):
         return self.file
 
+    def final_data(self):
+        results = {"key1": "Value 1"}
+        return results
+
+    def display(self):
+        result = self.final_data()
+        print(result)
+
     def write_result_files(self, target_folder):
+        # get final data
+        result = self.final_data()
         file, _ = self.file.split(".")
         new_file_name = f"{file}.txt"
         target_file = os.path.join(target_folder, new_file_name)
-        f = open(target_file, "a")
+        f = open(target_file, "w")
         f.write("Test")
         f.close()
 
@@ -54,10 +65,8 @@ class FileObj(object):
         """
         with open(self.file_path, "r") as f:
             data = f.read()
-        return self.parse_data(data)
 
-    def parse_data(self,data):
-        result = {}
+        result = parse_data(data)
         return ResultObj(self.file, **result)
 
 
@@ -72,6 +81,8 @@ def main(folder: str):
     typer.echo(f"Checking {folder}")
     # list all files
     files = os.listdir(folder)
+    if "results" in files:
+        files.remove("results")
     # make list of full file path
     abs_file_list = [prefix_folder_path(file, folder) for file in files]
     # make list of file instances for every files
@@ -85,6 +96,7 @@ def main(folder: str):
         os.makedirs(result_directory)
     # write results in to a text file (later to excel file)
     for result in result_obj_list:
+        result.display()
         result.write_result_files(result_directory)
 
 
